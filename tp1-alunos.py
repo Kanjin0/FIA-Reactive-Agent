@@ -56,14 +56,16 @@ def simulate(steps=1000,seed=None, policy = None):
 #Perceptions
 ##TODO: Defina as suas perceções aqui
 
-posX = lambda x:x[0]
-posY = lambda x:x[1]
-velX = lambda x:x[2]
-velY = lambda x:x[3]
-orientation = lambda x:x[4]
-velAng = lambda x:x[5]
-left_leg = lambda x:x[6]
-right_leg = lambda x:x[7]
+perceptions = dict(
+    posX = lambda x:x[0],
+    posY = lambda x:x[1],
+    velX = lambda x:x[2],
+    velY = lambda x:x[3],
+    orientation = lambda x:x[4],
+    velAng = lambda x:x[5],
+    left_leg = lambda x:x[6],
+    right_leg = lambda x:x[7]
+)
 
 #Actions
 ##TODO: Defina as suas ações aqui
