@@ -19,7 +19,7 @@ env = gym.make("LunarLander-v3", render_mode =RENDER_MODE,
 def check_successful_landing(observation):
     x = observation[0]
     vy = observation[3]
-    theta = observation[4]
+    ori = observation[4]
     contact_left = observation[6]
     contact_right = observation[7]
 
@@ -28,7 +28,7 @@ def check_successful_landing(observation):
     on_landing_pad = abs(x) <= 0.2
 
     stable_velocity = vy > -0.2
-    stable_orientation = abs(theta) < np.deg2rad(20)
+    stable_orientation = abs(ori) < np.deg2rad(20)
     stable = stable_velocity and stable_orientation
  
     if legs_touching and on_landing_pad and stable:
@@ -56,27 +56,154 @@ def simulate(steps=1000,seed=None, policy = None):
 #Perceptions
 ##TODO: Defina as suas perceções aqui
 
-perceptions = dict(
-    posX = lambda x:x[0],
-    posY = lambda x:x[1],
-    velX = lambda x:x[2],
-    velY = lambda x:x[3],
-    orientation = lambda x:x[4],
-    velAng = lambda x:x[5],
-    left_leg = lambda x:x[6],
-    right_leg = lambda x:x[7]
-)
+posX = lambda var: var[0]
+posY = lambda var: var[1]
+velX = lambda var: var[2]
+velY = lambda var: var[3]
+orientation = lambda var: var[4]
+velocAngular = lambda var: var[5]
+left_leg_touching = lambda var: var[6]
+right_leg_touching = lambda var: var[7]
+
 
 #Actions
 ##TODO: Defina as suas ações aqui
 
 
 
+act = dict(
+    up = np.array([1,0]),
+    left = np.array([0,-1]),
+    right = np.array([0,1])
+)
+
+
+def moveUp(action,mod):
+    action += np.array([1, mod])
+    # action += act['up']*mod
+    
+def turn(action,mod):
+    action += act["left"]*mod
+
+def moveLeft(action,mod):
+    action += act['left']*mod
+
+def moveRight(action,mod):
+    action += act['right']*mod
+
+
+
+
 def reactive_agent(observation):
-    ##TODO: Implemente aqui o seu agente reativo
-    ##Substitua a linha abaixo pela sua implementação
-    action = [0,0]
-    return action 
+    action = np.array([0.0, 0.0])
+    
+    x = posX(observation)
+    y = posY(observation)
+    vx = velX(observation)
+    vy = velY(observation)
+    ori = orientation(observation)
+    velAng = velocAngular(observation)
+    left_leg = left_leg_touching(observation)
+    right_leg = right_leg_touching(observation)
+
+    # if left_leg and right_leg:
+    #     return action
+    
+    
+    # if  x > 0.1 and ori < 0: #Is on right and leaning left
+    #     # Turn
+    #     modL = max(0,.7-velAng)
+    #     modU = max(0,.7-vy)
+    #     moveLeft(action,modL)
+    #     moveUp(action,modU)
+    #     return action
+       
+
+    # if x < -0.1 and ori > 0: #Is on left and leaning right
+    #     modR = min(0,-.7-velAng)
+    #     modU = max(0,.7-vy)
+    #     moveRight(action,modR)
+    #     moveUp(action,modU)
+    #     return action
+    
+
+    # if 0.1 < y < 1:
+    #     mod = max (0, 1.4-y)
+    #     moveUp(action,mod)
+    #     return action
+
+    # Salvador's test #
+    if left_leg and right_leg:
+        return action
+    
+    # If falling too fast, go up
+    if vy < -.2:
+        moveUp(action, ori+velAng)
+        return action
+    
+    # # If ship is too low outside flags, go up
+    # if y < .3 and (x < .25 or x > .25):
+    #     moveUp(action, ori+velAng)
+    #     return action
+    
+    # Turning too fast, turn the other way
+    if velAng > .2 or velAng < -.2:
+        turn(action, -velAng)
+        return action
+    
+    # Going X too fast, turn
+    if vx > .5 or vx < -.5:
+        turn(action, vx)
+        return action
+    
+    
+    # if y < .2 and x > .2:
+    #     moveUp(action, ori)
+    #     return action
+    
+    """
+    # Is left, turn right
+    if x < -.2 and ori > 0 and vx < 0.5:
+        turn(action, -.7)
+        return action
+    """
+    # Balance
+    # if x < -.2 and ori < -.1 and velAng < .1:# and vx > .5:
+    #     turn(action, .7)
+    #     return action
+    """
+    # Is right, turn left
+    if x > .2 and ori < 0 and vx > -0.5:
+        turn(action, .7)
+        return action
+    """
+    # Balance
+    # if x > .2 and ori > .1 and velAng > -.1:# and vx < -.5:
+    #     turn(action, -.7)
+    #     return action
+    
+    # Between flags
+    # Correct orientation
+    # if ori < 0 and velAng < 0.1 :
+    #     turn(action,  -.5)
+    #     return action
+    
+    # if ori > 0 and velAng > -.1:
+    #     turn(action, .5)
+    #     return action
+    
+    # if vx > 0 and ori <= 0:
+    #     turn(action, -1)
+    #     return action
+    
+    # if vx < 0 and ori >= 0:
+    #     turn(action, 1)
+    #     return action
+
+
+
+
+    return action
     
     
 def keyboard_agent(observation):
