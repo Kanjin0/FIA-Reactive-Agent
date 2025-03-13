@@ -1,6 +1,7 @@
 import gymnasium as gym
 import numpy as np
 import pygame
+from math import sin, cos, pi
 
 ENABLE_WIND = False
 WIND_POWER = 15.0
@@ -106,39 +107,22 @@ def reactive_agent(observation):
     left_leg = left_leg_touching(observation)
     right_leg = right_leg_touching(observation)
 
-    # if left_leg and right_leg:
-    #     return action
-    
-    
-    # if  x > 0.1 and ori < 0: #Is on right and leaning left
-    #     # Turn
-    #     modL = max(0,.7-velAng)
-    #     modU = max(0,.7-vy)
-    #     moveLeft(action,modL)
-    #     moveUp(action,modU)
-    #     return action
-       
-
-    # if x < -0.1 and ori > 0: #Is on left and leaning right
-    #     modR = min(0,-.7-velAng)
-    #     modU = max(0,.7-vy)
-    #     moveRight(action,modR)
-    #     moveUp(action,modU)
-    #     return action
-    
-
-    # if 0.1 < y < 1:
-    #     mod = max (0, 1.4-y)
-    #     moveUp(action,mod)
-    #     return action
-
     # Salvador's test #
-    if left_leg and right_leg:
+    if y < 0.1 and vx < -0.2:
+        turn(action, vx)
+        return action
+    
+    if y < 0.1 and vx > 0.2:
+        turn(action,1.15*vx)
+        return action
+    
+    if left_leg and right_leg and -0.2 < vx < 0.2:
         return action
     
     # If falling too fast, go up
-    if vy < -.2:
-        moveUp(action, ori+velAng)
+    if vy < -.27:
+        
+        moveUp(action, -0.75*sin(ori)*vy+(ori+velAng))
         return action
     
     # # If ship is too low outside flags, go up
@@ -147,13 +131,13 @@ def reactive_agent(observation):
     #     return action
     
     # Turning too fast, turn the other way
-    if velAng > .2 or velAng < -.2:
-        turn(action, -velAng)
+    if velAng > .35 or velAng < -.35:
+        turn(action, -1.25*velAng)
         return action
     
     # Going X too fast, turn
-    if vx > .5 or vx < -.5:
-        turn(action, vx)
+    if vx > .4 or vx < -.4:
+        turn(action, 1.15*vx)
         return action
     
     
