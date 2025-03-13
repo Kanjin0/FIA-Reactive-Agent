@@ -115,10 +115,6 @@ def reactive_agent(observation):
     left_leg = observation[6]
     right_leg = observation[7]
 
-    # if y < 0.11 and abs(vx) > 0.27:
-    #     turn(action, -1.13*cos(ori)*vx)
-    #     return action
-
     
     # If ship is too low and outside flag's range:
     #   turn in flags' direction
@@ -134,23 +130,12 @@ def reactive_agent(observation):
     if bothLegsTouching(left_leg, right_leg, vx):
         return action
     
-    # if abs(x) < 0.05:
-    #     moveUp(action, 1)
-    #     turn(action,-0.01*sin(ori)*vy +ori+velAng)
-    #     return action
-    
     # If ship is falling too fast:
     #   go up while maintaining balance
     if fallingFast(vy):
         moveUp(action, 1)
         turn(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
-    
-    # # If ship is too low outside flags, go up
-    # if y < .3 and (x < .25 or x > .25):
-    #     move(up, action)
-    #     turn(action, ori+velAng)
-    #     return action
     
     # If ship is turning too fast:
     #   turn the other way
@@ -167,27 +152,43 @@ def reactive_agent(observation):
         return action
     
     
+    # Failed Tests #
+
+    # if y < 0.11 and abs(vx) > 0.27:
+    #     turn(action, -1.13*cos(ori)*vx)
+    #     return action
+    
+    # if abs(x) < 0.05:
+    #     moveUp(action, 1)
+    #     turn(action,-0.01*sin(ori)*vy +ori+velAng)
+    #     return action
+    
+    # # If ship is too low outside flags, go up
+    # if y < .3 and (x < .25 or x > .25):
+    #     move(up, action)
+    #     turn(action, ori+velAng)
+    #     return action
+    
     # if y < .2 and x > .2:
     #     move(up, action)
     #     turn(action, ori)
     #     return action
     
-    """
-    # Is left, turn right
-    if x < -.2 and ori > 0 and vx < 0.5:
-        turn(action, -.7)
-        return action
-    """
+    # # Is left, turn right
+    # if x < -.2 and ori > 0 and vx < 0.5:
+    #     turn(action, -.7)
+    #     return action
+    
     # Balance
     # if x < -.2 and ori < -.1 and velAng < .1:# and vx > .5:
     #     turn(action, .7)
     #     return action
-    """
-    # Is right, turn left
-    if x > .2 and ori < 0 and vx > -0.5:
-        turn(action, .7)
-        return action
-    """
+    
+    # # Is right, turn left
+    # if x > .2 and ori < 0 and vx > -0.5:
+    #     turn(action, .7)
+    #     return action
+    
     # Balance
     # if x > .2 and ori > .1 and velAng > -.1:# and vx < -.5:
     #     turn(action, -.7)
