@@ -67,14 +67,16 @@ def simulate(steps=4000,seed=None, policy = None):
 # Perceptions #
 
 #   Ship is below given y_threshold
-# & Ship is further from center than given x_threshold
-def lowAndFar(y, x, y_threshold, x_threshold):
-    return y < y_threshold and abs(x) > x_threshold
+def isLow(y, threshold):
+    return y < threshold
 
-#   Ship's legs are both touching
-# & Ship is moving (faster?) than given threshold
-def bothLegsTouching(left, right, vx, threshold):
-    return left and right and abs(vx) > threshold
+#   Ship is further from center than given x_threshold
+def isFar(x, threshold):
+    return abs(x) > threshold
+
+#   Ship's legs are both touching the ground
+def bothLegsTouching(left, right):
+    return left and right
 
 #   Ship is falling faster than given threshold
 def fallingFast(vy, threshold):
@@ -119,15 +121,16 @@ def reactive_agent(observation):
     # If ship is too low and outside flag's range:
     #   turn in flags' direction
     #   while keeping its balance
-    if lowAndFar(y, x, 0.11, 0.22):
+    if isLow(y, 0.11) and isFar(x, 0.22):
         moveUp(action, 1)
         turn(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
         #turn(action,1.2*x)
         return action
     
-    # If both legs are touching the ground and not going sideways too fast
+    # If both legs are touching the ground
+    # & not going sideways too fast:
     #   do nothing
-    if bothLegsTouching(left_leg, right_leg, vx, 0.25):
+    if bothLegsTouching(left_leg, right_leg) and not sidewaysFast(vx, 0.25):
         return action
     
     # If ship is falling too fast:
