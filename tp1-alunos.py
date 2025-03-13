@@ -8,7 +8,7 @@ WIND_POWER = 15.0
 TURBULENCE_POWER = 0.0
 GRAVITY = -10.0
 RENDER_MODE = 'human'
-RENDER_MODE = None #seleccione esta opção para não visualizar o ambiente (testes mais rápidos)
+#RENDER_MODE = None #seleccione esta opção para não visualizar o ambiente (testes mais rápidos)
 EPISODES = 1000
 
 env = gym.make("LunarLander-v3", render_mode =RENDER_MODE, 
@@ -86,14 +86,6 @@ def moveUp(action,mod):
 def turn(action,mod):
     action += act["left"]*mod
 
-def moveLeft(action,mod):
-    action += act['left']*mod
-
-def moveRight(action,mod):
-    action += act['right']*mod
-
-
-
 
 def reactive_agent(observation):
     action = np.array([0.0, 0.0])
@@ -113,8 +105,8 @@ def reactive_agent(observation):
     #     return action
 
     
-    if y < 0.11 and abs(x) > 0.2:
-        moveUp(action,-2.4*x)
+    if y < 0.11 and abs(x) > 0.22:
+        moveUp(action,-2.4*x*0.72*sin(ori)*vy +ori+velAng)
         #turn(action,1.2*x)
         return action
     
