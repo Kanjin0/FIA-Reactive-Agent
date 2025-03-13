@@ -54,95 +54,122 @@ def simulate(steps=4000,seed=None, policy = None):
 
 
 
-#Perceptions
-##TODO: Defina as suas perceções aqui
-
-posX = lambda var: var[0]
-posY = lambda var: var[1]
-velX = lambda var: var[2]
-velY = lambda var: var[3]
-orientation = lambda var: var[4]
-velocAngular = lambda var: var[5]
-left_leg_touching = lambda var: var[6]
-right_leg_touching = lambda var: var[7]
+# posX = lambda var: var[0]
+# posY = lambda var: var[1]
+# velX = lambda var: var[2]
+# velY = lambda var: var[3]
+# orientation = lambda var: var[4]
+# velocAngular = lambda var: var[5]
+# left_leg_touching = lambda var: var[6]
+# right_leg_touching = lambda var: var[7]
 
 
-#Actions
-##TODO: Defina as suas ações aqui
+# Perceptions #
+
+#   Ship is below a given y threshold
+# & Ship is further from center than a given x threshold
+def lowAndFar(y, x):
+    return y < 0.11 and abs(x) > 0.22
+
+#   Ship's legs are both touching
+# & Ship's absolute horizontal speed is (greater?) than given vx threshold
+def bothLegsTouching(left, right, vx):
+    return left and right and abs(vx) > 0.25
+
+#   Ship is falling faster than given vy threshold
+def fallingFast(vy):
+    return vy < -.27
+
+#   Ship turning faster than given velAng threshold
+def turningFast(velAng):
+    return abs(velAng) > 0.4
+
+#   Ship is moving sideways faster than given vx threshold
+def sidewaysFast(vx):
+    return abs(vx) > 0.275
 
 
 
-act = dict(
-    up = np.array([1,0]),
-    left = np.array([0,-1]),
-    right = np.array([0,1])
-)
+# Actions #
 
-
+# Turn main motor on with given power
 def moveUp(action,mod):
     action += np.array([1, mod])
-    # action += act['up']*mod
     
+# Turn on secondary motor with given power
+# A positive value will turn on left motor
+# A negative value will turn on right motor
 def turn(action,mod):
-    action += act["left"]*mod
+    action += np.array([0, mod])
 
 
 def reactive_agent(observation):
     action = np.array([0.0, 0.0])
     
-    x = posX(observation)
-    y = posY(observation)
-    vx = velX(observation)
-    vy = velY(observation)
-    ori = orientation(observation)
-    velAng = velocAngular(observation)
-    left_leg = left_leg_touching(observation)
-    right_leg = right_leg_touching(observation)
+    x = observation[0]
+    y = observation[1]
+    vx = observation[2]
+    vy = observation[3]
+    ori = observation[4]
+    velAng = observation[5]
+    left_leg = observation[6]
+    right_leg = observation[7]
 
-    # Salvador's test #
     # if y < 0.11 and abs(vx) > 0.27:
     #     turn(action, -1.13*cos(ori)*vx)
     #     return action
 
     
-    if y < 0.11 and abs(x) > 0.22:
-        moveUp(action,-2.4*x*0.72*sin(ori)*vy +ori+velAng)
+    # If ship is too low and outside flag's range:
+    #   turn in flags' direction
+    #   while keeping its balance
+    if lowAndFar(y, x):
+        moveUp(action, 1)
+        turn(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
         #turn(action,1.2*x)
         return action
     
-    
-    if left_leg and right_leg and abs(vx) > 0.25:
+    # If both legs are touching the ground and not going sideways too fast
+    #   do nothing
+    if bothLegsTouching(left_leg, right_leg, vx):
         return action
     
     # if abs(x) < 0.05:
-    #     moveUp(action,-0.01*sin(ori)*vy +ori+velAng)
+    #     moveUp(action, 1)
+    #     turn(action,-0.01*sin(ori)*vy +ori+velAng)
     #     return action
     
-    # If falling too fast, go up
-    if vy < -.27:
-        
-        moveUp(action, -0.75*sin(ori)*vy +ori+velAng)
+    # If ship is falling too fast:
+    #   go up while maintaining balance
+    if fallingFast(vy):
+        moveUp(action, 1)
+        turn(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
     
     # # If ship is too low outside flags, go up
     # if y < .3 and (x < .25 or x > .25):
-    #     moveUp(action, ori+velAng)
+    #     move(up, action)
+    #     turn(action, ori+velAng)
     #     return action
     
-    # Turning too fast, turn the other way
-    if abs(velAng) > 0.4:
+    # If ship is turning too fast:
+    #   turn the other way
+    if turningFast(velAng):
         turn(action, -1.25*velAng*(1-0.1*x))
         return action
     
-    # Going X too fast, turn
-    if abs(vx) > 0.275:
-        #moveUp(action,(1-x)*-sin(ori)*vy)
+    # If ship is moving sideways too fast:
+    #   turn opposite direction
+    if sidewaysFast(vx):
+        #move(up, action)
+        #turn(action,(1-x)*-sin(ori)*vy)
         turn(action, 1.02*(1-0.13*x)*1.15*vx)
         return action
     
     
     # if y < .2 and x > .2:
-    #     moveUp(action, ori)
+    #     move(up, action)
+    #     turn(action, ori)
     #     return action
     
     """
