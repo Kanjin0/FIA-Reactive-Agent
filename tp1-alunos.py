@@ -8,7 +8,7 @@ WIND_POWER = 15.0
 TURBULENCE_POWER = 0.0
 GRAVITY = -10.0
 RENDER_MODE = 'human'
-#RENDER_MODE = None #seleccione esta opção para não visualizar o ambiente (testes mais rápidos)
+RENDER_MODE = None #seleccione esta opção para não visualizar o ambiente (testes mais rápidos)
 EPISODES = 1000
 
 env = gym.make("LunarLander-v3", render_mode =RENDER_MODE, 
@@ -108,12 +108,13 @@ def reactive_agent(observation):
     right_leg = right_leg_touching(observation)
 
     # Salvador's test #
-    if y < 0.1 and vx < -0.2:
-        turn(action, vx)
-        return action
+    # if y < 0.11 and abs(vx) > 0.27:
+    #     turn(action, -1.13*cos(ori)*vx)
+    #     return action
     
-    if y < 0.1 and vx > 0.2:
-        turn(action,1.15*vx)
+    
+    if left_leg and right_leg and abs(vx) > 0.25:
+        turn(action,x)
         return action
     
     if left_leg and right_leg and -0.2 < vx < 0.2:
@@ -131,12 +132,13 @@ def reactive_agent(observation):
     #     return action
     
     # Turning too fast, turn the other way
-    if velAng > .35 or velAng < -.35:
-        turn(action, -1.25*velAng)
+    if abs(velAng) > 0.35:
+        turn(action, -1.25*velAng )
         return action
     
     # Going X too fast, turn
-    if vx > .4 or vx < -.4:
+    if abs(vx) > 0.275:
+        #moveUp(action,abs(ori+velAng))
         turn(action, 1.15*vx)
         return action
     
