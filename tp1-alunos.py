@@ -66,27 +66,27 @@ def simulate(steps=4000,seed=None, policy = None):
 
 # Perceptions #
 
-#   Ship is below a given y threshold
-# & Ship is further from center than a given x threshold
-def lowAndFar(y, x):
-    return y < 0.11 and abs(x) > 0.22
+#   Ship is below given y_threshold
+# & Ship is further from center than given x_threshold
+def lowAndFar(y, x, y_threshold, x_threshold):
+    return y < y_threshold and abs(x) > x_threshold
 
 #   Ship's legs are both touching
-# & Ship's absolute horizontal speed is (greater?) than given vx threshold
-def bothLegsTouching(left, right, vx):
-    return left and right and abs(vx) > 0.25
+# & Ship is moving (faster?) than given threshold
+def bothLegsTouching(left, right, vx, threshold):
+    return left and right and abs(vx) > threshold
 
-#   Ship is falling faster than given vy threshold
-def fallingFast(vy):
-    return vy < -.27
+#   Ship is falling faster than given threshold
+def fallingFast(vy, threshold):
+    return vy < threshold
 
-#   Ship turning faster than given velAng threshold
-def turningFast(velAng):
-    return abs(velAng) > 0.4
+#   Ship turning faster than given threshold
+def turningFast(velAng, threshold):
+    return abs(velAng) > threshold
 
-#   Ship is moving sideways faster than given vx threshold
-def sidewaysFast(vx):
-    return abs(vx) > 0.275
+#   Ship is moving sideways faster than given threshold
+def sidewaysFast(vx, threshold):
+    return abs(vx) > threshold
 
 
 
@@ -119,7 +119,7 @@ def reactive_agent(observation):
     # If ship is too low and outside flag's range:
     #   turn in flags' direction
     #   while keeping its balance
-    if lowAndFar(y, x):
+    if lowAndFar(y, x, 0.11, 0.22):
         moveUp(action, 1)
         turn(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
         #turn(action,1.2*x)
@@ -127,25 +127,25 @@ def reactive_agent(observation):
     
     # If both legs are touching the ground and not going sideways too fast
     #   do nothing
-    if bothLegsTouching(left_leg, right_leg, vx):
+    if bothLegsTouching(left_leg, right_leg, vx, 0.25):
         return action
     
     # If ship is falling too fast:
     #   go up while maintaining balance
-    if fallingFast(vy):
+    if fallingFast(vy, -.27):
         moveUp(action, 1)
         turn(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
     
     # If ship is turning too fast:
     #   turn the other way
-    if turningFast(velAng):
+    if turningFast(velAng, 0.4):
         turn(action, -1.25*velAng*(1-0.1*x))
         return action
     
     # If ship is moving sideways too fast:
     #   turn opposite direction
-    if sidewaysFast(vx):
+    if sidewaysFast(vx, 0.275):
         #move(up, action)
         #turn(action,(1-x)*-sin(ori)*vy)
         turn(action, 1.02*(1-0.13*x)*1.15*vx)
@@ -211,9 +211,6 @@ def reactive_agent(observation):
     # if vx < 0 and ori >= 0:
     #     turn(action, 1)
     #     return action
-
-
-
 
     return action
     
