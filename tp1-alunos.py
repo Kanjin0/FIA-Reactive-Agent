@@ -39,7 +39,7 @@ def check_successful_landing(observation):
     print("⚠️ Aterragem falhada!")        
     return False
         
-def simulate(steps=1000,seed=None, policy = None):    
+def simulate(steps=4000,seed=None, policy = None):    
     observ, _ = env.reset(seed=seed)
     for step in range(steps):
         action = policy(observ)
@@ -111,19 +111,25 @@ def reactive_agent(observation):
     # if y < 0.11 and abs(vx) > 0.27:
     #     turn(action, -1.13*cos(ori)*vx)
     #     return action
+
+    
+    if y < 0.11 and abs(x) > 0.2:
+        moveUp(action,-2.4*x)
+        #turn(action,1.2*x)
+        return action
     
     
     if left_leg and right_leg and abs(vx) > 0.25:
-        turn(action,x)
         return action
     
-    if left_leg and right_leg and -0.2 < vx < 0.2:
-        return action
+    # if abs(x) < 0.05:
+    #     moveUp(action,-0.01*sin(ori)*vy +ori+velAng)
+    #     return action
     
     # If falling too fast, go up
     if vy < -.27:
         
-        moveUp(action, -0.75*sin(ori)*vy+(ori+velAng))
+        moveUp(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
     
     # # If ship is too low outside flags, go up
@@ -132,14 +138,14 @@ def reactive_agent(observation):
     #     return action
     
     # Turning too fast, turn the other way
-    if abs(velAng) > 0.35:
-        turn(action, -1.25*velAng )
+    if abs(velAng) > 0.4:
+        turn(action, -1.25*velAng*(1-0.1*x))
         return action
     
     # Going X too fast, turn
     if abs(vx) > 0.275:
-        #moveUp(action,abs(ori+velAng))
-        turn(action, 1.15*vx)
+        #moveUp(action,(1-x)*-sin(ori)*vy)
+        turn(action, 1.02*(1-0.13*x)*1.15*vx)
         return action
     
     
