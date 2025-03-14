@@ -9,7 +9,7 @@ TURBULENCE_POWER = 0.0
 GRAVITY = -10.0
 RENDER_MODE = 'human'
 #RENDER_MODE = None #seleccione esta opção para não visualizar o ambiente (testes mais rápidos)
-EPISODES = 1000
+EPISODES = 4000
 
 env = gym.make("LunarLander-v3", render_mode =RENDER_MODE, 
     continuous=True, gravity=GRAVITY, 
@@ -32,14 +32,14 @@ def check_successful_landing(observation):
     stable_orientation = abs(ori) < np.deg2rad(20)
     stable = stable_velocity and stable_orientation
  
-    if legs_touching and on_landing_pad and stable:
-        print("✅ Aterragem bem sucedida!")
+    if    legs_touching and on_landing_pad and stable:
+        print(f"✅ Aterragem bem sucedida!\n\tstable_velocity:{stable_velocity}\n\tlegs_touching:{legs_touching}\n\ton_landing_pad:{on_landing_pad}")
         return True
 
-    print("⚠️ Aterragem falhada!")        
+    print(f"⚠️ Aterragem falhada! \n\tstable_velocity:{stable_velocity}\n\tlegs_touching:{legs_touching}\n\ton_landing_pad:{on_landing_pad}")        
     return False
         
-def simulate(steps=4000,seed=None, policy = None):    
+def simulate(steps=1000,seed=None, policy = None):    
     observ, _ = env.reset(seed=seed)
     for step in range(steps):
         action = policy(observ)
@@ -99,13 +99,8 @@ def reactive_agent(observation):
     left_leg = left_leg_touching(observation)
     right_leg = right_leg_touching(observation)
 
-    # Salvador's test #
-    # if y < 0.11 and abs(vx) > 0.27:
-    #     turn(action, -1.13*cos(ori)*vx)
-    #     return action
 
-    
-    if y < 0.11 and abs(x) > 0.22:
+    if (y < 0.11 and abs(x) > 0.22) :
         moveUp(action,-2.4*x*0.72*sin(ori)*vy +ori+velAng)
         #turn(action,1.2*x)
         return action
@@ -114,20 +109,13 @@ def reactive_agent(observation):
     if left_leg and right_leg and abs(vx) > 0.25:
         return action
     
-    # if abs(x) < 0.05:
-    #     moveUp(action,-0.01*sin(ori)*vy +ori+velAng)
-    #     return action
     
     # If falling too fast, go up
-    if vy < -.27:
+    if vy < -.25:
         
         moveUp(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
     
-    # # If ship is too low outside flags, go up
-    # if y < .3 and (x < .25 or x > .25):
-    #     moveUp(action, ori+velAng)
-    #     return action
     
     # Turning too fast, turn the other way
     if abs(velAng) > 0.4:
@@ -140,52 +128,9 @@ def reactive_agent(observation):
         turn(action, 1.02*(1-0.13*x)*1.15*vx)
         return action
     
-    
-    # if y < .2 and x > .2:
-    #     moveUp(action, ori)
-    #     return action
-    
-    """
-    # Is left, turn right
-    if x < -.2 and ori > 0 and vx < 0.5:
-        turn(action, -.7)
+    if y > 0.11 and ((x > 0.33 and ori > 0.25) or ( x < -0.33 and ori < -0.25)):
+        turn(action, -2.1*0.75*sin(ori)*vy +ori+velAng)
         return action
-    """
-    # Balance
-    # if x < -.2 and ori < -.1 and velAng < .1:# and vx > .5:
-    #     turn(action, .7)
-    #     return action
-    """
-    # Is right, turn left
-    if x > .2 and ori < 0 and vx > -0.5:
-        turn(action, .7)
-        return action
-    """
-    # Balance
-    # if x > .2 and ori > .1 and velAng > -.1:# and vx < -.5:
-    #     turn(action, -.7)
-    #     return action
-    
-    # Between flags
-    # Correct orientation
-    # if ori < 0 and velAng < 0.1 :
-    #     turn(action,  -.5)
-    #     return action
-    
-    # if ori > 0 and velAng > -.1:
-    #     turn(action, .5)
-    #     return action
-    
-    # if vx > 0 and ori <= 0:
-    #     turn(action, -1)
-    #     return action
-    
-    # if vx < 0 and ori >= 0:
-    #     turn(action, 1)
-    #     return action
-
-
-
 
     return action
     
