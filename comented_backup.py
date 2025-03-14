@@ -57,8 +57,8 @@ def simulate(steps=4000,seed=None, policy = None):
 
 def getPerceptions(x, y, vx, vy, ori, velAng, left_leg, right_leg):
     return {
-        "leftTouching" : left_leg,
-        "rightTouching": right_leg,
+        "leftTouching"  : left_leg,
+        "rightTouching" : right_leg,
         "isLow"         : y < 0.11,
         "isFar"         : abs(x) > 0.22,
         "isFarLeft"     : x < -0.33,
@@ -76,14 +76,14 @@ def getPerceptions(x, y, vx, vy, ori, velAng, left_leg, right_leg):
 
 # Turn main motor on with given power
 def moveUp(action,mod):
-    # action += np.array([mod, 0])
-    action += np.array([1, mod])
+    action += np.array([mod, 0])
+    # action += np.array([1, mod])
     
 # Turn on secondary motor with given power
 # A positive value will turn on left motor
 # A negative value will turn on right motor
 def turn(action,mod):
-    action += np.array([0, -mod])
+    action += np.array([0, mod])
 
 
 def reactive_agent(observation):
@@ -111,23 +111,23 @@ def reactive_agent(observation):
     #   turn in flags' direction
     #   while keeping its balance
     if perc["isLow"] and perc["isFar"]:
-        # moveUp(action, 1)
-        # turn(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
-        moveUp(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
+        moveUp(action, 1)
+        turn(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
+        # moveUp(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
         return action
     
     # If ship is falling too fast:
     #   go up while maintaining balance
     if perc["fallingFast"]:
-        # moveUp(action, 1)
-        # turn(action, -0.75*sin(ori)*vy +ori+velAng)
-        moveUp(action, -0.75*sin(ori)*vy +ori+velAng)
+        moveUp(action, 1)
+        turn(action, -0.75*sin(ori)*vy +ori+velAng)
+        # moveUp(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
     
     # If ship is turning too fast:
     #   turn the other way
     if perc["turningFast"]:
-        turn(action, -1.25*velAng*(1-0.1*x))
+        turn(action, 1.25*velAng*(1-0.1*x))
         return action
     
     # If ship is moving sideways too fast:
@@ -135,7 +135,7 @@ def reactive_agent(observation):
     if perc["sidewaysFast"]:
         #move(up, action)
         #turn(action,(1-x)*-sin(ori)*vy)
-        turn(action, 1.02*(1-0.13*x)*1.15*vx)
+        turn(action, -1.02*(1-0.13*x)*1.15*vx)
         return action
     
     # If ship is too low
@@ -144,7 +144,7 @@ def reactive_agent(observation):
     #    ):
     #   turn oposite direction
     if not perc["isLow"] and ((perc["isFarRight"] and perc["leaningLeft"]) or (perc["isFarLeft"] and perc["leaningRight"])):
-        turn(action, -2.1*0.75*sin(ori)*vy +ori+velAng)
+        turn(action, 2.1*0.75*sin(ori)*vy -ori-velAng)
         return action
     
     
