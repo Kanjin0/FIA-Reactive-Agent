@@ -8,7 +8,7 @@ WIND_POWER = 15.0
 TURBULENCE_POWER = 0.0
 GRAVITY = -10.0
 RENDER_MODE = 'human'
-#RENDER_MODE = None #seleccione esta opção para não visualizar o ambiente (testes mais rápidos)
+RENDER_MODE = None #seleccione esta opção para não visualizar o ambiente (testes mais rápidos)
 EPISODES = 4000
 
 env = gym.make("LunarLander-v3", render_mode =RENDER_MODE, 
@@ -99,35 +99,49 @@ def reactive_agent(observation):
     left_leg = left_leg_touching(observation)
     right_leg = right_leg_touching(observation)
 
+    
+    # If both legs are touching the ground
+    # & not going sideways too fast:
+    #   do nothing
+    if left_leg and right_leg and abs(x) < 0.1:
+        return action
 
+    
+    # If ship is too low and outside flag's range:
+    #   turn in flags' direction
+    #   while keeping some of its balance
     if (y < 0.11 and abs(x) > 0.22) :
         moveUp(action,-2.4*x*0.72*sin(ori)*vy +ori+velAng)
         #turn(action,1.2*x)
-        return action
+        return action    
     
     
-    if left_leg and right_leg and abs(vx) > 0.25:
-        return action
-    
-    
-    # If falling too fast, go up
+    # If ship is falling too fast:
+    #   go up while maintaining balance
     if vy < -.25:
         
         moveUp(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
     
     
-    # Turning too fast, turn the other way
+    # If ship is turning too fast:
+    #   turn the other way
     if abs(velAng) > 0.4:
         turn(action, -1.25*velAng*(1-0.1*x))
         return action
     
-    # Going X too fast, turn
+    # If ship is moving sideways too fast:
+    #   turn opposite direction
     if abs(vx) > 0.275:
         #moveUp(action,(1-x)*-sin(ori)*vy)
         turn(action, 1.02*(1-0.13*x)*1.15*vx)
         return action
     
+    # If ship is too low
+    # &  ( is far right and facing right
+    #    | is far left and facing left
+    #    ):
+    #   turn oposite direction
     if y > 0.11 and ((x > 0.33 and ori > 0.25) or ( x < -0.33 and ori < -0.25)):
         turn(action, -2.1*0.75*sin(ori)*vy +ori+velAng)
         return action

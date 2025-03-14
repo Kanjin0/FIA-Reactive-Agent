@@ -53,56 +53,37 @@ def simulate(steps=4000,seed=None, policy = None):
     return step, success
 
 
-
-# posX = lambda var: var[0]
-# posY = lambda var: var[1]
-# velX = lambda var: var[2]
-# velY = lambda var: var[3]
-# orientation = lambda var: var[4]
-# velocAngular = lambda var: var[5]
-# left_leg_touching = lambda var: var[6]
-# right_leg_touching = lambda var: var[7]
-
-
 # Perceptions #
 
-#   Ship is below given y_threshold
-def isLow(y, threshold):
-    return y < threshold
-
-#   Ship is further from center than given x_threshold
-def isFar(x, threshold):
-    return abs(x) > threshold
-
-#   Ship's legs are both touching the ground
-def bothLegsTouching(left, right):
-    return left and right
-
-#   Ship is falling faster than given threshold
-def fallingFast(vy, threshold):
-    return vy < threshold
-
-#   Ship turning faster than given threshold
-def turningFast(velAng, threshold):
-    return abs(velAng) > threshold
-
-#   Ship is moving sideways faster than given threshold
-def sidewaysFast(vx, threshold):
-    return abs(vx) > threshold
-
+def getPerceptions(x, y, vx, vy, ori, velAng, left_leg, right_leg):
+    return {
+        "leftTouching" : left_leg,
+        "rightTouching": right_leg,
+        "isLow"         : y < 0.11,
+        "isFar"         : abs(x) > 0.22,
+        "isFarLeft"     : x < -0.33,
+        "isFarRight"    : x > 0.33,
+        "inCenter"      : abs(x) < .1,
+        "leaningRight"  : ori < -0.25,
+        "leaningLeft"   : ori > 0.25,
+        "fallingFast"   : vy < -0.25,
+        "turningFast"   : abs(velAng) > 0.4,
+        "sidewaysFast"  : abs(vx) > 0.275
+    }
 
 
 # Actions #
 
 # Turn main motor on with given power
 def moveUp(action,mod):
+    # action += np.array([mod, 0])
     action += np.array([1, mod])
     
 # Turn on secondary motor with given power
 # A positive value will turn on left motor
 # A negative value will turn on right motor
 def turn(action,mod):
-    action += np.array([0, mod])
+    action += np.array([0, -mod])
 
 
 def reactive_agent(observation):
@@ -117,42 +98,55 @@ def reactive_agent(observation):
     left_leg = observation[6]
     right_leg = observation[7]
 
+    perc = getPerceptions(x, y, vx, vy, ori, velAng, left_leg, right_leg)
     
-    # If ship is too low and outside flag's range:
-    #   turn in flags' direction
-    #   while keeping its balance
-    if isLow(y, 0.11) and isFar(x, 0.22):
-        moveUp(action, 1)
-        turn(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
-        #turn(action,1.2*x)
-        return action
     
     # If both legs are touching the ground
     # & not going sideways too fast:
     #   do nothing
-    if bothLegsTouching(left_leg, right_leg) and not sidewaysFast(vx, 0.25):
+    if perc["leftTouching"] and perc["rightTouching"] and perc["inCenter"]:
+        return action
+    
+    # If ship is too low and outside flag's range:
+    #   turn in flags' direction
+    #   while keeping its balance
+    if perc["isLow"] and perc["isFar"]:
+        # moveUp(action, 1)
+        # turn(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
+        moveUp(action, -2.4*x*0.72*sin(ori)*vy +ori+velAng)
         return action
     
     # If ship is falling too fast:
     #   go up while maintaining balance
-    if fallingFast(vy, -.27):
-        moveUp(action, 1)
-        turn(action, -0.75*sin(ori)*vy +ori+velAng)
+    if perc["fallingFast"]:
+        # moveUp(action, 1)
+        # turn(action, -0.75*sin(ori)*vy +ori+velAng)
+        moveUp(action, -0.75*sin(ori)*vy +ori+velAng)
         return action
     
     # If ship is turning too fast:
     #   turn the other way
-    if turningFast(velAng, 0.4):
+    if perc["turningFast"]:
         turn(action, -1.25*velAng*(1-0.1*x))
         return action
     
     # If ship is moving sideways too fast:
     #   turn opposite direction
-    if sidewaysFast(vx, 0.275):
+    if perc["sidewaysFast"]:
         #move(up, action)
         #turn(action,(1-x)*-sin(ori)*vy)
         turn(action, 1.02*(1-0.13*x)*1.15*vx)
         return action
+    
+    # If ship is too low
+    # &  ( is far right and facing right
+    #    | is far left and facing left
+    #    ):
+    #   turn oposite direction
+    if not perc["isLow"] and ((perc["isFarRight"] and perc["leaningLeft"]) or (perc["isFarLeft"] and perc["leaningRight"])):
+        turn(action, -2.1*0.75*sin(ori)*vy +ori+velAng)
+        return action
+    
     
     
     # Failed Tests #
