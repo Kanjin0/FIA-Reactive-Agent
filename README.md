@@ -26,6 +26,20 @@ The resulting fitness score guides the evolutionary algorithm towards increasing
 
 ---
 
+# Controller Design
+
+Rather than directly controlling every action through manually defined rules, the agent computes thruster commands based on the current state of the spacecraft, including:
+
+- Position
+- Linear velocity
+- Orientation
+- Angular velocity
+- Contact with the landing surface
+
+The controller uses a set of parameters that determine how these variables influence the activation of the main and side thrusters. These parameters are optimised using an evolutionary algorithm, allowing the controller to progressively discover landing strategies that satisfy the imposed landing constraints while maintaining stable trajectories.
+
+---
+
 # Features
 
 - Autonomous spacecraft control
@@ -50,7 +64,7 @@ The resulting fitness score guides the evolutionary algorithm towards increasing
 
 # Project Structure
 
-```
+```text
 .
 ├── agent.py
 ├── evolution.py
@@ -60,25 +74,27 @@ The resulting fitness score guides the evolutionary algorithm towards increasing
 └── ...
 ```
 
-*(Update this tree to reflect the repository.)*
+*(Update this tree to reflect the repository structure.)*
 
 ---
 
 # Running
 
-Install the required dependencies (WARNING: There may be trouble in doing it this way. Speaking from personal experience, as one of the contributors of this project, you may need to install the parts listed in the requirements one by one)
+Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the simulation
+> **Note:** Depending on the operating system and Python version, some dependencies may need to be installed individually. If `pip install -r requirements.txt` fails, install the listed packages one by one.
+
+Run one of the available controllers:
 
 ```bash
 python tp1-alunos.py
 ```
 
-or 
+or
 
 ```bash
 python trigo.py
@@ -92,10 +108,10 @@ This project provided practical experience with:
 
 - Evolutionary computation
 - Artificial intelligence
-- Fitness function design
+- Autonomous agent design
+- Fitness function engineering
 - Physics-based simulation
-- Autonomous agents
-- Parameter optimisation
+- Controller optimisation
 - Scientific computing using Python
 
 ---
@@ -104,15 +120,15 @@ This project provided practical experience with:
 
 Potential future developments include:
 
-- Alternative evolutionary algorithms
-- Reinforcement learning comparison
+- Comparison with reinforcement learning approaches
 - Neural-network-based controllers
 - Multi-objective optimisation
-- Adaptive mutation strategies
+- Adaptive mutation and crossover strategies
 - Visualisation of the optimisation process
+- Automated parameter sensitivity analysis
 
 ---
 
 # Acknowledgements
 
-Developed collaboratively as part of the Artificial Intelligence course in the B.Sc. in Informatics Engineering at the University of Coimbra.
+Developed collaboratively as part of the **Artificial Intelligence** course in the B.Sc. in Informatics Engineering at the **University of Coimbra**.
