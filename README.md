@@ -66,7 +66,7 @@ The resulting fitness score guides the evolutionary algorithm towards increasing
 
 # Running
 
-Install the required dependencies
+Install the required dependencies (WARNING: There may be trouble in doing it this way. Speaking from personal experience, as one of the contributors of this project, you may need to install the parts listed in the requirements one by one)
 
 ```bash
 pip install -r requirements.txt
