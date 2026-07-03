@@ -115,4 +115,4 @@ Potential future developments include:
 
 # Acknowledgements
 
-Developed as part of the Artificial Intelligence course in the B.Sc. in Informatics Engineering at the University of Coimbra.
+Developed collaboratively as part of the Artificial Intelligence course in the B.Sc. in Informatics Engineering at the University of Coimbra.
