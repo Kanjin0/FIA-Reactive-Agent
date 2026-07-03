@@ -75,7 +75,13 @@ pip install -r requirements.txt
 Run the simulation
 
 ```bash
-python main.py
+python tp1-alunos.py
+```
+
+or 
+
+```bash
+python trigo.py
 ```
 
 ---
